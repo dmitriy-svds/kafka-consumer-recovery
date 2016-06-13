@@ -32,11 +32,13 @@ fi
 
 cd $__dir
 [ -d "kafka-compose" ] || git clone git@github.com:dmitriy-svds/kafka-compose.git
+[ -d "kafka_2.10-0.9.0.1" ] || curl -O http://apache.spinellicreations.com/kafka/0.9.0.1/kafka_2.10-0.9.0.1.tgz && tar -xf kafka_2.10-0.9.0.1.tgz && rm kafka_2.10-0.9.0.1.tgz
+
 (cd kafka-compose; ./start_environment.sh)
 
 DOCKER_IP=$(docker-machine ip default)
 
-kafka-compose/confluent-1.0.1/bin/kafka-topics --create --zookeeper $DOCKER_IP:2181 --topic $TOPIC --partitions $PARTITIONS --replication-factor $REPLICATION_FACTOR
+kafka_2.10-0.9.0.1/bin/kafka-topics.sh --create --zookeeper $DOCKER_IP:2181 --topic $TOPIC --partitions $PARTITIONS --replication-factor $REPLICATION_FACTOR
 
 if [ "${MODE}" = "local" ]; then 
   echo "running in local mode"

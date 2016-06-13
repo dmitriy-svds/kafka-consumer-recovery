@@ -28,7 +28,6 @@ public class RunConsumerHarness {
                 " Running with props %s, topic %s,outputDir %s", args[0],
                 args[1], args[2]));
 
-        //TODO: figure out best size for buffer
         final int WRITE_BATCH_SIZE = 1000;
 
         Properties kafkaConsumerProps = new Properties();
@@ -48,7 +47,7 @@ public class RunConsumerHarness {
         ArrayList<String> outputBuffer = new ArrayList<>();
 
         try {
-            while (true) {                
+            while (true) {
                 ConsumerRecords<String, String> records = consumer.poll(1000);
                 if (records.count() > 0) {
                     for (ConsumerRecord<String, String> record : records) {
@@ -71,7 +70,7 @@ public class RunConsumerHarness {
             if (outputBuffer.size() > 0) {
                 System.out.println("found non-zero buffer at exit, writing " + outputBuffer.size() + " records to file");
                 writeBufferToFile(outFile, outputBuffer);
-            }          
+            }
             consumer.close();
         }
 
