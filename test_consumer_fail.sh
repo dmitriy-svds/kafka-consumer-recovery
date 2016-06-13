@@ -17,26 +17,13 @@ PARTITIONS=1
 REPLICATION_FACTOR=2
 HARNESS_VERSION=0.1
 
+
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
-  command -v docker >/dev/null 2>&1 || { echo >&2 "Script requires docker but it's not installed.  Aborting."; exit 1; }
+  DOCKER_IP=localhost
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-  command -v docker-machine >/dev/null 2>&1 || { echo >&2 "Script requires docker-machine but it's not installed.  Aborting."; exit 1; }
-  command -v docker >/dev/null 2>&1 || { echo >&2 "Script requires docker but it's not installed.  Aborting."; exit 1; }
-  docker-machine start default
   eval $(docker-machine env default)
-
-  echo "docker machine running on IP:"
-  echo `docker-machine ip default`
-  eval $(docker-machine env default)
+  DOCKER_IP=$(docker-machine ip default)
 fi
-
-cd $__dir
-[ -d "kafka-compose" ] || git clone git@github.com:dmitriy-svds/kafka-compose.git
-[ -d "kafka_2.10-0.9.0.1" ] || curl -O http://apache.spinellicreations.com/kafka/0.9.0.1/kafka_2.10-0.9.0.1.tgz && tar -xf kafka_2.10-0.9.0.1.tgz && rm kafka_2.10-0.9.0.1.tgz
-
-(cd kafka-compose; ./start_environment.sh)
-
-DOCKER_IP=$(docker-machine ip default)
 
 kafka_2.10-0.9.0.1/bin/kafka-topics.sh --create --zookeeper $DOCKER_IP:2181 --topic $TOPIC --partitions $PARTITIONS --replication-factor $REPLICATION_FACTOR
 
@@ -56,7 +43,7 @@ if [ "${REBUILD}" = "yes" ]; then
 fi
 
 if [ ! -d archive ]; then
-  mkdir archive
+  mkdir -p archive
 fi
 
 if [ -d output_$RUN ]; then
@@ -64,7 +51,7 @@ if [ -d output_$RUN ]; then
   mv output_$RUN archive/output_${RUN}_${seconds}
 fi
 
-mkdir output_$RUN
+mkdir -p output_$RUN
 
 java -jar kafka-consumer-harness/target/kafka-consumer-harness-$HARNESS_VERSION.jar \
   $CONSUMER_PROPS $TOPIC $__dir/output_$RUN >> consumer.out 2>&1 &

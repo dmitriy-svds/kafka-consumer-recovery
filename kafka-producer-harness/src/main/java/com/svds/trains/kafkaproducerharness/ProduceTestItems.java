@@ -80,7 +80,6 @@ public class ProduceTestItems {
 
         System.out.println("Finished sending " + i + " records in: "
                 + totalMillis + " millis");
-
     }
 
 }
