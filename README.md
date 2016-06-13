@@ -10,7 +10,7 @@ Linux: Docker
 
 ## Running the harness:
 `./test_consumer_fail.sh [run name] [#of iterations] [rebuild(yes/no)]`
-*During every run, the 'run name' should be changed to avoid collision with previously-created topcis
+*During every run, the 'run name' should be changed to avoid collision with previously-created topics
 
 Watching the output:
 `tail -f consumer.out producer.out`
