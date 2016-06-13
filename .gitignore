@@ -13,3 +13,4 @@ kafka-compose
 confluent-*
 output-*
 archive
+*.out
