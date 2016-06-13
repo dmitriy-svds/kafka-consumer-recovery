@@ -1,4 +1,4 @@
-package com.svds.trains.kafkaconsumerharness;
+package com.svds.kafkaconsumerharness;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

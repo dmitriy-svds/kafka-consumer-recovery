@@ -1,4 +1,4 @@
-package com.svds.trains.kafkaproducerharness;
+package com.svds.kafkaproducerharness;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
