@@ -2,21 +2,15 @@ package com.svds.kafkaproducerharness;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.Metric;
-import org.apache.kafka.common.MetricName;
 
-//import uk.co.jemos.podam.api.PodamFactory;
-//import uk.co.jemos.podam.api.PodamFactoryImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Accepts Kafka cluster configurations, number of iterations. Sends items to
@@ -26,9 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ProduceTestItems {
 
-    // public static PodamFactory podamFactory = new PodamFactoryImpl();
-
-    public static ObjectMapper mapper = new ObjectMapper();
+    private static final Logger LOG = LoggerFactory.getLogger(ProduceTestItems.class);
 
     public static void main(String[] args) throws MalformedURLException,
             IOException, InterruptedException, ExecutionException {
@@ -41,22 +33,20 @@ public class ProduceTestItems {
         Producer<String, String> producer = new KafkaProducer<String, String>(
                 kafkaProducerProps);
 
-        Map<MetricName, ? extends Metric> metrics = producer.metrics();
-
         Integer iterations = Integer.parseInt(args[2]);
-
-        Integer i;
-
+        
         long prevMillis = start;
 
         String topic = args[1];
 
         int messagesSent = 0;
-        System.out.println("Running " + iterations + " iterations for topic: "
+        LOG.info("Running " + iterations + " iterations for topic: "
                 + topic);
 
+        Integer i;
         for (i = 0; i < iterations; i++) {
 
+        	//Messages will be in format: "Message_[no of message]"
             producer.send(new ProducerRecord<String, String>(topic, i
                     .toString(), "Message_" + i));
             messagesSent++;
@@ -72,13 +62,14 @@ public class ProduceTestItems {
             }
         }
 
+        //Let's actually send the messages
         producer.flush();
 
         long end = System.currentTimeMillis();
 
         long totalMillis = end - start;
 
-        System.out.println("Finished sending " + i + " records in: "
+        LOG.info("Finished sending " + i + " records in: "
                 + totalMillis + " millis");
     }
 
