@@ -2,8 +2,8 @@
 A project to test at-least-once recovery of a Kafka consumer.
 
 ## Requirements:
-OSX: [Docker Machine](https://docs.docker.com/machine/install-machine/) - with a 'default' machine already created
-Linux: Docker
+* OSX: [Docker Machine](https://docs.docker.com/machine/install-machine/) - with a 'default' machine already created
+* Linux: Docker
 
 ## Set-up the dev environment
 `./dev_setup.sh`
