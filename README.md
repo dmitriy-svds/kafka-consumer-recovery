@@ -14,7 +14,7 @@ A project to test at-least-once recovery of a Kafka consumer.
 **During every run, the 'run name' should be changed to avoid collision with previously-created topics*
 
 Watching the output:
-`tail -f consumer.out producer.out`
+`tail -f log/*`
 
 ## Tear-down dev environment
 `./dev_teardown.sh`
