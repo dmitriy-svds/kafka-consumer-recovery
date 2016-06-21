@@ -9,8 +9,9 @@ A project to test at-least-once recovery of a Kafka consumer.
 `./dev_setup.sh`
 
 ## Running the harness:
-`./test_consumer_fail.sh [run name] [#of iterations] [rebuild(yes/no)]`
-*During every run, the 'run name' should be changed to avoid collision with previously-created topics
+`./test_consumer_fail.sh [run name]* [#of iterations] [rebuild(yes/no)]`
+
+**During every run, the 'run name' should be changed to avoid collision with previously-created topics*
 
 Watching the output:
 `tail -f consumer.out producer.out`
