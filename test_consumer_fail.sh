@@ -54,13 +54,13 @@ fi
 mkdir -p output_$RUN
 
 java -jar kafka-consumer-harness/target/kafka-consumer-harness-$HARNESS_VERSION.jar \
-  $CONSUMER_PROPS $TOPIC $__dir/output_$RUN >> consumer.out 2>&1 &
+  $CONSUMER_PROPS $TOPIC $__dir/output_$RUN &
 consumer_pid=$!
 
 sleep 2
 
 java -jar kafka-producer-harness/target/kafka-producer-harness-$HARNESS_VERSION.jar \
-  $PRODUCER_PROPS $TOPIC $ITERATIONS >> producer.out 2>&1 &
+  $PRODUCER_PROPS $TOPIC $ITERATIONS &
 producer_pid=$!
 
 cleanup() {
@@ -77,7 +77,7 @@ sleep 15
 kill -9 $consumer_pid
 
 java -jar kafka-consumer-harness/target/kafka-consumer-harness-$HARNESS_VERSION.jar \
-  $CONSUMER_PROPS $TOPIC $__dir/output_$RUN >> consumer.out 2>&1 &
+  $CONSUMER_PROPS $TOPIC $__dir/output_$RUN &
 consumer_pid=$!
 
 while true

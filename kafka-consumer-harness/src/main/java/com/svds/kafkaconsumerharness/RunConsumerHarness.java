@@ -1,4 +1,4 @@
-package com.svds.trains.kafkaconsumerharness;
+package com.svds.kafkaconsumerharness;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -10,24 +10,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
-import kafka.serializer.Decoder;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RunConsumerHarness {
 
-    // private static final int WRITE_BATCH_SIZE = 1;
+    private static final Logger LOG = LoggerFactory.getLogger(RunConsumerHarness.class);
 
     public static void main(String[] args) throws MalformedURLException,
     IOException {
 
-        System.out.println(String.format(
+        LOG.info(String.format(
                 " Running with props %s, topic %s,outputDir %s", args[0],
                 args[1], args[2]));
 
+        //This could be tweaked according to your needs
         final int WRITE_BATCH_SIZE = 1000;
 
         Properties kafkaConsumerProps = new Properties();
@@ -37,30 +38,33 @@ public class RunConsumerHarness {
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(
                 kafkaConsumerProps);
-
         consumer.subscribe(Arrays.asList(topic));
+        
+        //This harness only uses 1 partition, but could be more than that in the future
         TopicPartition partition0 = new TopicPartition(topic, 0);
-
-        System.out.println("starting with offset: " + consumer.committed(partition0));
+        LOG.debug("starting with offset: " + consumer.committed(partition0));
         Path outFile = Paths.get(args[2] + "/" + topic + ".out");
 
+        //Buffering the disk I/O
         ArrayList<String> outputBuffer = new ArrayList<>();
-
         try {
             while (true) {
+            	//New consumer API for in Kafka 0.9.*.*
                 ConsumerRecords<String, String> records = consumer.poll(1000);
                 if (records.count() > 0) {
                     for (ConsumerRecord<String, String> record : records) {
                         outputBuffer.add("Partition: " + record.partition() + ",Offset: " + record.offset() + ",Key:" + record.key() + ",Value:"+ record.value());
                     }
                     if (outputBuffer.size() >= WRITE_BATCH_SIZE) {
+                    	//Make sure everything is written out to the file before committing the offset
                         writeBufferToFile(outFile, outputBuffer);
                         consumer.commitSync();
                         outputBuffer.clear();
                     }
                 } else {
+                	//This will happen when our buffer size is below WRITE_BATCH SIZE
                     if (outputBuffer.size() > 0) {
-                        System.out.println("clearing non-zero buffer");
+                        LOG.debug("clearing non-zero buffer");
                         writeBufferToFile(outFile, outputBuffer);
                         outputBuffer.clear();
                     }
@@ -68,22 +72,14 @@ public class RunConsumerHarness {
             }
         } finally {
             if (outputBuffer.size() > 0) {
-                System.out.println("found non-zero buffer at exit, writing " + outputBuffer.size() + " records to file");
+            	//Write out everything left in the buffer before quitting
+                LOG.debug("found non-zero buffer at exit, writing " + outputBuffer.size() + " records to file");
                 writeBufferToFile(outFile, outputBuffer);
             }
             consumer.close();
         }
 
-    }
-
-    public static Decoder<String> getStringDecoder() {
-        Decoder<String> decoder = new Decoder<String>() {
-            public String fromBytes(byte[] bytes) {
-                return bytes.toString();
-            }
-        };
-        return decoder;
-    }
+    }    
 
     private static void writeBufferToFile(Path outFile,
             ArrayList<String> outputBuffer) {
@@ -94,7 +90,7 @@ public class RunConsumerHarness {
             System.err.println(e.getMessage());
         }
 
-        System.out.println("Writing buffer with length: " + outputBuffer.size()
+        LOG.debug("Writing buffer with length: " + outputBuffer.size()
                 + " to file: " + outFile.toString());
 
         try {
@@ -104,10 +100,10 @@ public class RunConsumerHarness {
             }
             writer.close();
         } catch (IOException e1) {
-            System.err.println(e1.getMessage());
+            LOG.error(e1.getMessage());
         }
 
-        System.out.println("finished writing buffer");
+        LOG.debug("finished writing buffer");
     }
 
 }
